@@ -32,7 +32,7 @@ var sqlitePath = flag.String("s", "./blacknote.db", "Path for sqlite storage")
 var logger *log.Logger
 var syslogger *log.Logger
 var db *sql.DB
-var connectionString = flag.String("d","","PostgreSQL connection string")
+var connectionString = flag.String("d", "", "PostgreSQL connection string")
 
 // Variables for template generation in BlackNote
 type Paste struct {
@@ -53,7 +53,7 @@ func initDB(path string) error {
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS pastes(Id TEXT NOT NULL PRIMARY KEY, Ciphertext TEXT NOT NULL, InsertTime DATETIME)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS pastes(Id TEXT NOT NULL PRIMARY KEY, Ciphertext TEXT NOT NULL, InsertTime TIMESTAMTZ)")
 	if err != nil {
 		return err
 	}
