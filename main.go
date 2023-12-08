@@ -53,7 +53,7 @@ func initDB(path string) error {
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS pastes(Id TEXT NOT NULL PRIMARY KEY, Ciphertext TEXT NOT NULL, InsertTime TIMESTAMTZ)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS pastes(Id TEXT NOT NULL PRIMARY KEY, Ciphertext TEXT NOT NULL, InsertTime TIMESTAMPTZ)")
 	if err != nil {
 		return err
 	}
