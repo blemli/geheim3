@@ -57,10 +57,6 @@ func initDB(path string) error {
 	if err != nil {
 		return err
 	}
-	err = os.Chmod(path, 0600)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
