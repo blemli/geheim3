@@ -28,7 +28,6 @@ var listenAddress = flag.String("l", ":8443", "Listening string (format in $IP:$
 var logOut = flag.String("o", "", "File to log to, empty means STDOUT")
 var logSyslog = flag.Bool("q", false, "Log to syslog as well")
 var baseURL = flag.String("b", "/", "Base URL to use for the application")
-var sqlitePath = flag.String("s", "./blacknote.db", "Path for sqlite storage")
 var logger *log.Logger
 var syslogger *log.Logger
 var db *sql.DB
@@ -42,7 +41,7 @@ type Paste struct {
 	Home       string
 }
 
-// Initialize database based on the sqlitePath command flag or ./blacknote.db
+// Initialize database based on the connection string
 // and fix permissions
 func initDB(path string) error {
 	var err error
