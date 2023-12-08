@@ -8,7 +8,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
 	"log/syslog"
@@ -16,6 +15,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	_ "github.com/lib/pq"
 )
 
 var resourceDir = flag.String("r", "./resources", "Directory to pull resources from")
@@ -31,6 +32,9 @@ var sqlitePath = flag.String("s", "./blacknote.db", "Path for sqlite storage")
 var logger *log.Logger
 var syslogger *log.Logger
 var db *sql.DB
+var db_user = flag.String("u", "", "Database username")
+var db_pass = flag.String("p", "", "Database password")
+var db_host = flag.String("h", "", "Database host")
 
 // Variables for template generation in BlackNote
 type Paste struct {
@@ -44,8 +48,10 @@ type Paste struct {
 // and fix permissions
 func initDB(path string) error {
 	var err error
-	db, err = sql.Open("sqlite3", path)
-	if err != nil || db == nil {
+	// Replace with your PostgreSQL connection string
+	connStr := "postgres://" + *db_host + ":" + *db_pass + "@" + *db_host + "/geheim"
+	db, err = sql.Open("postgres", connStr)
+	if err != nil {
 		return err
 	}
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS pastes(Id TEXT NOT NULL PRIMARY KEY, Ciphertext TEXT NOT NULL, InsertTime DATETIME)")
@@ -62,7 +68,7 @@ func initDB(path string) error {
 // Insert a new paste into the database, This is unsafe to call directly
 // (always ensure that validation happens before calling this function)
 func insertDB(id, ciphertext string) error {
-	stmt, err := db.Prepare("INSERT INTO pastes(Id, Ciphertext, InsertTime) values(?,?,CURRENT_TIMESTAMP)")
+	stmt, err := db.Prepare("INSERT INTO pastes(Id, Ciphertext, InsertTime) VALUES ($1, $2, CURRENT_TIMESTAMP)")
 	if err != nil {
 		return err
 	}
@@ -78,7 +84,7 @@ func insertDB(id, ciphertext string) error {
 // (always ensure that validation happens before calling this function)
 func getPasteDB(id string) (string, error) {
 	var ct string
-	rows, err := db.Query("SELECT Ciphertext FROM pastes WHERE Id = ?", id)
+	rows, err := db.Query("SELECT Ciphertext FROM pastes WHERE Id = $1", id)
 	if err != nil {
 		return "", err
 	}
@@ -96,7 +102,7 @@ func getPasteDB(id string) (string, error) {
 // Remove a paste from the database. This is unsafe to call directly
 // (always ensure that validation happens before calling this function)
 func delPasteDB(id string) error {
-	stmt, err := db.Prepare("DELETE FROM pastes WHERE Id = ?")
+	stmt, err := db.Prepare("DELETE FROM pastes WHERE Id = $1")
 	if err != nil {
 		return err
 	}
@@ -143,40 +149,40 @@ func genUID() string {
 }
 
 func getTemplate(w http.ResponseWriter, page string) *template.Template {
-    var validPage = regexp.MustCompile("[^A-Za-z0-9]")
-    m := validPage.MatchString(page)
-    if m == true {
-        http.Error(w, "An error occured", 500)
-        logMessage(fmt.Sprintf("Render received an invalid file name: %s\n", page))
-        page = "notfound"
-    }
+	var validPage = regexp.MustCompile("[^A-Za-z0-9]")
+	m := validPage.MatchString(page)
+	if m == true {
+		http.Error(w, "An error occured", 500)
+		logMessage(fmt.Sprintf("Render received an invalid file name: %s\n", page))
+		page = "notfound"
+	}
 
-    t, err := template.ParseFiles("templates/"+page+".html","templates/base.html")
+	t, err := template.ParseFiles("templates/"+page+".html", "templates/base.html")
 	if err != nil {
 		logError(err)
 	}
-    return t
+	return t
 }
 
 // Render page
-func renderCiphertext(w http.ResponseWriter, page string, ciphertext string){
-    var t = getTemplate(w, page)
-    var home = ""
-    if *baseURL != "" {
-        home = *baseURL
-    }
-    var err = t.ExecuteTemplate(w, "base", Paste{BaseURL: *baseURL, Type: "notfound", Home: home, Ciphertext: ciphertext})
+func renderCiphertext(w http.ResponseWriter, page string, ciphertext string) {
+	var t = getTemplate(w, page)
+	var home = ""
+	if *baseURL != "" {
+		home = *baseURL
+	}
+	var err = t.ExecuteTemplate(w, "base", Paste{BaseURL: *baseURL, Type: "notfound", Home: home, Ciphertext: ciphertext})
 	if err != nil {
 		logError(err)
 	}
 }
 
-func render(w http.ResponseWriter, page string){
-    var t = getTemplate(w, page)
-    var home = ""
-    if *baseURL != "" {
-        home = *baseURL
-    }
+func render(w http.ResponseWriter, page string) {
+	var t = getTemplate(w, page)
+	var home = ""
+	if *baseURL != "" {
+		home = *baseURL
+	}
 	var err = t.ExecuteTemplate(w, "base", Paste{BaseURL: *baseURL, Home: home})
 	if err != nil {
 		logError(err)
@@ -189,7 +195,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		errorHandler(w, r, http.StatusNotFound)
 		return
 	}
-    render(w, "create")
+	render(w, "create")
 }
 
 // Handler for creating a paste (the index)
@@ -198,7 +204,7 @@ func infoHandler(w http.ResponseWriter, r *http.Request) {
 		errorHandler(w, r, http.StatusNotFound)
 		return
 	}
-    render(w, "info")
+	render(w, "info")
 }
 
 // Validation regexes for paths and URL compatible base64
@@ -209,7 +215,7 @@ var validBase64 = regexp.MustCompile("^(?:[A-Za-z0-9-_]{4})*(?:[A-Za-z0-9-_]{2}=
 func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
 	if status == http.StatusNotFound {
-        render(w, "notfound")
+		render(w, "notfound")
 	}
 }
 
@@ -254,7 +260,7 @@ func secretHandler(w http.ResponseWriter, r *http.Request) {
 				logError(err)
 			}
 
-            renderCiphertext(w, "read", string(paste))
+			renderCiphertext(w, "read", string(paste))
 		}
 	}
 }
