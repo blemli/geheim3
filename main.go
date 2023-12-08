@@ -32,9 +32,7 @@ var sqlitePath = flag.String("s", "./blacknote.db", "Path for sqlite storage")
 var logger *log.Logger
 var syslogger *log.Logger
 var db *sql.DB
-var db_user = flag.String("u", "", "Database username")
-var db_pass = flag.String("p", "", "Database password")
-var db_host = flag.String("h", "", "Database host")
+var connectionString = flag.String("d","","PostgreSQL connection string")
 
 // Variables for template generation in BlackNote
 type Paste struct {
@@ -49,7 +47,8 @@ type Paste struct {
 func initDB(path string) error {
 	var err error
 	// Replace with your PostgreSQL connection string
-	connStr := "postgres://" + *db_host + ":" + *db_pass + "@" + *db_host + "/geheim"
+	//connStr := "postgres://" + *db_host + ":" + *db_pass + "@" + *db_host + "/geheim"
+	connStr := *connectionString
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		return err
