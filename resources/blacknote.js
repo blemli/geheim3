@@ -169,5 +169,11 @@ var blacknote = {
     },
     rfc4648Decode: function(b64txt) {
         return b64txt.replace(/\-/g, '+').replace(/_/g, '/')
-    }
+    },
+    copy: function() {
+      var copyText = document.getElementById("link").getElementsByTagName("p")[0].innerHTML;
+      var button = document.getElementById("copyButton");
+      button.innerHTML = "Link kopiert";
+      navigator.clipboard.writeText(copyText);
+  }
 }
