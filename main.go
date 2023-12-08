@@ -43,11 +43,11 @@ type Paste struct {
 
 // Initialize database based on the connection string
 // and fix permissions
-func initDB(path string) error {
+func initDB(connStr string) error {
 	var err error
 	// Replace with your PostgreSQL connection string
 	//connStr := "postgres://" + *db_host + ":" + *db_pass + "@" + *db_host + "/geheim"
-	connStr := *connectionString
+	//connStr := *connectionString
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		return err
@@ -277,7 +277,7 @@ func main() {
 			panic(err)
 		}
 	}
-	err := initDB(*sqlitePath)
+	err := initDB(*connectionString)
 	if err != nil {
 		panic(err)
 	}
