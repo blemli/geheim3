@@ -235,7 +235,7 @@ func secretHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Fprintf(w, uid)
 		}
-	default:
+	case "GET":
 		m := validPath.MatchString(r.URL.Path)
 		if m == false {
 			errorHandler(w, r, http.StatusNotFound)
