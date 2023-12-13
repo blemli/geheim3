@@ -18,6 +18,11 @@
     {
       "src": "/r/favicon.ico",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/r/hand.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "id": "7c91997a-f853-4226-bf24-88d017ac7223",
