@@ -1,0 +1,27 @@
+{
+  "background_color": "#ffffff",
+  "description": "Geheim -  Passwörter sicher versenden",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "geheim.problem.li",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Geheim",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "categories": [
+    "security",
+    "utilities"
+  ],
+  "screenshots": [],
+  "icons": [
+    {
+      "src": "/r/favicon.ico",
+      "type": "image/x-icon"
+    }
+  ],
+  "id": "7c91997a-f853-4226-bf24-88d017ac7223",
+  "display_override": [
+    "window-controls-overlay"
+  ]
+}
