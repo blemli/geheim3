@@ -15,6 +15,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -78,13 +79,17 @@ func insertDB(id, ciphertext string) error {
 // Delete pastes older than a certain time from the database.
 func deleteOlderThanDB(minutes int) error {
 	minutes = *deleteAfter
+	cutoffTime := time.Now().Add(-time.Duration(minutes) * time.Minute)
 	logMessage(fmt.Sprintf("trying to delete pastes older than %d minutes", minutes))
-	stmt, err := db.Prepare("DELETE FROM pastes WHERE InsertTime < NOW() - INTERVAL $1")
+	stmt, err := db.Prepare("DELETE FROM pastes WHERE InsertTime < $1")
 	if err != nil {
+		logMessage("could not prepare deleteAfter statement")
+		logError(err)
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(fmt.Sprintf("%d minutes", minutes))
+	//log statement
+	_, err = stmt.Exec(cutoffTime)
 	if err != nil {
 		return err
 	}
