@@ -28,10 +28,10 @@ services:
   github:
     branch: master
     deploy_on_push: true
-    repo: blemli/geheim3
+    repo: blemli/geheim
   http_port: 8443
   instance_count: 2
   instance_size_slug: professional-xs
   name: service
-  run_command: ./bin/geheim3 -I -d $DATABASE_URL
+  run_command: ./bin/geheim -I -d $DATABASE_URL
   source_dir: /

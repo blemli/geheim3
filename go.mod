@@ -1,4 +1,4 @@
-module github.com/blemli/geheim3
+module github.com/blemli/geheim
 
 go 1.20
 

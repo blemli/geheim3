@@ -40,4 +40,4 @@ The suggested installation is to use BlackNote behind a proxy (such as nginx) in
 
 
 ## run locally
-./main -I -d "postgresql://stephan:@127.0.0.1:5432/geheim3?sslmode=disable"
+./main -I -d "postgresql://stephan:@127.0.0.1:5432/geheim?sslmode=disable"
