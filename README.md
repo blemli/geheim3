@@ -37,3 +37,7 @@ This will require certificates and keys as HTTPS is forced by default. Certifica
 * `-I`: Insecure mode without HTTPS (not suggested ever)
 
 The suggested installation is to use BlackNote behind a proxy (such as nginx) in order to handle maximum upload size and a couple of other corner cases.
+
+
+## run locally
+./main -I -d "postgresql://stephan:@127.0.0.1:5432/geheim3?sslmode=disable"
