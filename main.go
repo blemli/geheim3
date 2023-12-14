@@ -28,10 +28,11 @@ var listenAddress = flag.String("l", ":8443", "Listening string (format in $IP:$
 var logOut = flag.String("o", "", "File to log to, empty means STDOUT")
 var logSyslog = flag.Bool("q", false, "Log to syslog as well")
 var baseURL = flag.String("b", "/", "Base URL to use for the application")
+var connectionString = flag.String("d", "", "PostgreSQL connection string")
+var deleteAfter = flag.Int("m", 14400, "Delete pastes after x minutes")
 var logger *log.Logger
 var syslogger *log.Logger
 var db *sql.DB
-var connectionString = flag.String("d", "", "PostgreSQL connection string")
 
 // Variables for template generation in BlackNote
 type Paste struct {
@@ -74,7 +75,10 @@ func insertDB(id, ciphertext string) error {
 	return nil
 }
 
+// Delete pastes older than a certain time from the database.
 func deleteOlderThanDB(minutes int) error {
+	minutes = *deleteAfter
+	logMessage(fmt.Sprintf("trying to delete pastes older than %d minutes", minutes))
 	stmt, err := db.Prepare("DELETE FROM pastes WHERE InsertTime < NOW() - INTERVAL '$1 minutes'")
 	if err != nil {
 		return err
@@ -84,13 +88,17 @@ func deleteOlderThanDB(minutes int) error {
 	if err != nil {
 		return err
 	}
+	logMessage(fmt.Sprintf("deleted pastes older than %d minutes", minutes))
 	return nil
 }
 
 // Retrieve a new paste from the database. This is unsafe to call directly
 // (always ensure that validation happens before calling this function)
 func getPasteDB(id string) (string, error) {
-	deleteOlderThanDB(3)
+	err := deleteOlderThanDB(3)
+	if err != nil {
+		logError(err)
+	}
 	var ct string
 	rows, err := db.Query("SELECT Ciphertext FROM pastes WHERE Id = $1", id)
 	if err != nil {
