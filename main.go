@@ -74,9 +74,23 @@ func insertDB(id, ciphertext string) error {
 	return nil
 }
 
+func deleteOlderThanDB(minutes int) error {
+	stmt, err := db.Prepare("DELETE FROM pastes WHERE InsertTime < NOW() - INTERVAL '$1 minutes'")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(minutes)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Retrieve a new paste from the database. This is unsafe to call directly
 // (always ensure that validation happens before calling this function)
 func getPasteDB(id string) (string, error) {
+	deleteOlderThanDB(3)
 	var ct string
 	rows, err := db.Query("SELECT Ciphertext FROM pastes WHERE Id = $1", id)
 	if err != nil {
@@ -235,7 +249,7 @@ func secretHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Fprintf(w, uid)
 		}
-	case "GET":
+	default:
 		m := validPath.MatchString(r.URL.Path)
 		if m == false {
 			errorHandler(w, r, http.StatusNotFound)
