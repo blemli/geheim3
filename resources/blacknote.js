@@ -86,24 +86,24 @@ var blacknote = {
         mats.decrypt(mats.ciphertext);
         return mats.message;
     },
-
+    
     addClass: function(id, classname) {
         document.getElementById(id).className =
-            document.getElementById(id).className + " " + classname;
+        document.getElementById(id).className + " " + classname;
     },
     removeClass: function(id, classname) {
         document.getElementById(id).className =
-            document.getElementById(id).className
-            .replace(new RegExp('(?:^|\\s)' + classname + '(?:\\s|$)'), ' ');
+        document.getElementById(id).className
+        .replace(new RegExp('(?:^|\\s)' + classname + '(?:\\s|$)'), ' ');
     },
-
+    
     hideCleartext: function() {
         blacknote.addClass("pre-crypt", "hidden");
     },
     showCleartext: function() {
         blacknote.removeClass("pre-crypt", "hidden");
     },
-
+    
     hideLink: function() {
         blacknote.addClass("post-crypt", "hidden");
     },
@@ -117,21 +117,21 @@ var blacknote = {
         selection.removeAllRanges();
         selection.addRange(range);
     },
-
+    
     hideDecrypted: function() {
         blacknote.addClass("secret", "hidden");
     },
     showDecrypted: function() {
         blacknote.removeClass("secret", "hidden");
     },
-
+    
     hideError: function() {
         blacknote.addClass("error", "hidden");
     },
     showError: function() {
         blacknote.removeClass("error", "hidden");
     },
-
+    
     genPaste: function(plaintext) {
         var a = blacknote.encrypt(plaintext);
         if (!a) {
@@ -145,18 +145,18 @@ var blacknote = {
         req.send('ciphertext=' + blacknote.rfc4648Encode(a.ciphertext));
         req.onload = function() {
             var baseURL = window.location.origin + window.location.pathname;
-            var link = baseURL + "s/" + req.response + "#" + tag;
-
+            var link = baseURL + "g/" + req.response + "#" + tag;
+            
             var html = "<p>" + link + "</p>";
             document.getElementById("link").innerHTML = html;
-
+            
             //html = "<a class='btn' href='" + link + "'>Direct Link</a>";
             //document.getElementById("direct-link").innerHTML = html;
-
+            
             blacknote.hideCleartext();
             blacknote.showLink();
             blacknote.selectLink();
-
+            
             //console.log(req.response);
         };
     },
@@ -171,9 +171,17 @@ var blacknote = {
         return b64txt.replace(/\-/g, '+').replace(/_/g, '/')
     },
     copy: function() {
-      var copyText = document.getElementById("link").getElementsByTagName("p")[0].innerHTML;
-      var button = document.getElementById("copyButton");
-      button.innerHTML = "Link kopiert";
-      navigator.clipboard.writeText(copyText);
-  }
+        var copyText = document.getElementById("link").getElementsByTagName("p")[0].innerHTML;
+        var button = document.getElementById("copyButton");
+        button.innerHTML = "Link kopiert";
+        navigator.clipboard.writeText(copyText);
+    },
+    replaceLink:	function(){
+        //get url
+        var url = window.location.href;
+        //replace '/g/ with /s/ in url'
+        url = url.replace("/g/", "/s/");
+        //set url as href for button
+        document.getElementById("retrieveButton").setAttribute("href",url);
+    }
 }

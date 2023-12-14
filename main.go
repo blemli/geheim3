@@ -229,7 +229,7 @@ func infoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Validation regexes for paths and URL compatible base64
-var validPath = regexp.MustCompile("^.*" + *baseURL + "s/[A-Fa-f0-9]{32}$")
+var validPath = regexp.MustCompile("^.*" + *baseURL + "[sg]/[A-Fa-f0-9]{32}$")
 var validBase64 = regexp.MustCompile("^(?:[A-Za-z0-9-_]{4})*(?:[A-Za-z0-9-_]{2}==|[A-Za-z0-9-_]{3}=)?$")
 
 // Handler for all errors
@@ -286,6 +286,17 @@ func secretHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func retrievalHandler(w http.ResponseWriter, r *http.Request) {
+	logMessage("retrievalHandler called")
+	m := validPath.MatchString(r.URL.Path)
+	if m == false {
+		errorHandler(w, r, http.StatusNotFound)
+		logMessage(fmt.Sprintf("Invalid path from %s\n", r.RemoteAddr))
+		return
+	}
+	render(w, "retrieve")
+}
+
 func main() {
 	flag.Parse()
 	if *logOut == "" {
@@ -313,6 +324,7 @@ func main() {
 	http.HandleFunc(*baseURL+"/", createHandler)
 	http.HandleFunc(*baseURL+"/i", infoHandler)
 	http.HandleFunc(*baseURL+"/s/", secretHandler)
+	http.HandleFunc(*baseURL+"/g/", retrievalHandler)
 	http.Handle(*baseURL+"/r/", http.StripPrefix(*baseURL+"/r/", http.FileServer(http.Dir(*resourceDir))))
 	if *disableHTTPS {
 		err := http.ListenAndServe(*listenAddress, nil)
