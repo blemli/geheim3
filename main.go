@@ -79,12 +79,12 @@ func insertDB(id, ciphertext string) error {
 func deleteOlderThanDB(minutes int) error {
 	minutes = *deleteAfter
 	logMessage(fmt.Sprintf("trying to delete pastes older than %d minutes", minutes))
-	stmt, err := db.Prepare("DELETE FROM pastes WHERE InsertTime < NOW() - INTERVAL '$1 minutes'")
+	stmt, err := db.Prepare("DELETE FROM pastes WHERE InsertTime < NOW() - INTERVAL $1")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(minutes)
+	_, err = stmt.Exec(fmt.Sprintf("%d minutes", minutes))
 	if err != nil {
 		return err
 	}
