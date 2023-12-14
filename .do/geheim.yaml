@@ -1,0 +1,37 @@
+alerts:
+- rule: DEPLOYMENT_FAILED
+- rule: DOMAIN_FAILED
+databases:
+- engine: PG
+  name: geheim
+  version: "12"
+domains:
+- domain: geheim.problem.li
+  type: PRIMARY
+features:
+- buildpack-stack=ubuntu-22
+ingress:
+  rules:
+  - component:
+      name: service
+    match:
+      path:
+        prefix: /
+name: geheim
+region: fra
+services:
+- environment_slug: go
+  envs:
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    value: ${geheim.DATABASE_URL}
+  github:
+    branch: master
+    deploy_on_push: true
+    repo: blemli/geheim3
+  http_port: 8443
+  instance_count: 2
+  instance_size_slug: professional-xs
+  name: service
+  run_command: ./bin/geheim3 -I -d $DATABASE_URL
+  source_dir: /
