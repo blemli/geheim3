@@ -24,9 +24,9 @@ jobs:
     - name: Build
       run: go build -v ./...
       
-    - name: Archive artifacts
+    - name: Collect and archive artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: dist-without-markdown
+        name: bin
         path: |
           geheim
